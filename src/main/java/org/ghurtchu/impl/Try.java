@@ -2,7 +2,9 @@ package org.ghurtchu.impl;
 
 import org.ghurtchu.protocols.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -117,10 +119,13 @@ public abstract class Try<T> implements PureFoldable<T>, ImpureFinalizable, Pure
 
     @SafeVarargs
     @Override
-    public final <V> V ifThrowsGetDefaultOrElseMap(Function<? super T, ? extends V> successMapper, V defaultValue, Class<? extends Exception>... exceptions) {
+    public final <V> V ifThrowsThenGetDefaultOrElseMap(Function<? super T, ? extends V> successMapper, V defaultValue, Class<? extends Exception>... exceptions) {
         if (this instanceof Failure) {
             Failure failure = (Failure) this;
-            if (Arrays.stream(exceptions).anyMatch(exception -> failure.getValue().getClass().equals(exception))) {
+            Class<? extends Exception> currentException       = failure.getValue().getClass();
+            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failure.getValue());
+            parentExceptions.add(currentException);
+            if (Arrays.stream(exceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
                 return defaultValue;
             } else {
                 throw new UncaughtException();
@@ -139,10 +144,13 @@ public abstract class Try<T> implements PureFoldable<T>, ImpureFinalizable, Pure
      */
     @SafeVarargs
     @Override
-    public final void ifThrowsCatchAndThenRun(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
+    public final void ifThrowsThenRun(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
         if (this instanceof Failure) {
             Failure failure = (Failure) this;
-            if (Arrays.stream(exceptions).anyMatch(exception -> failure.getValue().getClass().equals(exception))) {
+            Class<? extends Exception> currentException       = failure.getValue().getClass();
+            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failure.getValue());
+            parentExceptions.add(currentException);
+            if (Arrays.stream(exceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
                 consumer.accept(failure.getValue());
             }
         }
@@ -199,6 +207,23 @@ public abstract class Try<T> implements PureFoldable<T>, ImpureFinalizable, Pure
         }
     }
 
+    private static class TryUtils {
+
+        public static List<Class<? extends Exception>>getParentExceptions(Exception exception) {
+            List<Class<? extends Exception>> superExceptions = new ArrayList<>();
+            Class<?> superExc                                = exception.getClass().getSuperclass();
+            while (true) {
+                if (superExc == null) {
+                    break;
+                } else {
+                    superExceptions.add((Class<? extends Exception>) superExc);
+                    superExc = superExc.getSuperclass();
+                }
+            }
+            return superExceptions;
+        }
+
+    }
 
 
 }

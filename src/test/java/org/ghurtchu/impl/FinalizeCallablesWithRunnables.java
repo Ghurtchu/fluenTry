@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class FinalizeWithRunnables {
+public class FinalizeCallablesWithRunnables {
 
     @Test
     public void finalizeWithFailureRunnable() {
