@@ -18,7 +18,7 @@ with pure java
 
 with `fluenTry`
 ```java
-int result = Try.evaluate(() -> 42 / 0).fold(num -> num * 10, 0); // the result is 10
+int result = Try.evaluate(() -> 42 / 0).fold(num -> num * 10, 0);
 ```
 
 try extracting the substring, if it fails return "Default String" or else return the success
