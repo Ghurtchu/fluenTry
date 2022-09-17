@@ -2,10 +2,7 @@ package org.ghurtchu.impl;
 
 import org.ghurtchu.protocols.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -94,7 +91,11 @@ public abstract class Try<T> implements
     public final <V> V fold(Function<? super T, ? extends V> successMapper, V defaultValue) {
         if (this instanceof Success) {
             Success<T> success = (Success<T>) this;
-            return successMapper.apply(success.getValue());
+            T value = success.getValue();
+            if (value == null) {
+                value = (T) new Object();
+            }
+            return successMapper.apply(value);
         } else {
             return defaultValue;
         }
@@ -206,7 +207,11 @@ public abstract class Try<T> implements
 
         @Override
         protected T getValue() {
-            return value.get();
+            try {
+                return value.get();
+            } catch (NoSuchElementException nse) {
+                return null;
+            }
         }
     }
 
