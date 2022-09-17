@@ -4,7 +4,7 @@
 #### `Try#fold` - Returns the value based on if the main computation succeeded or failed
 try division, if fails return 0, or multiply the result by 10
 
-without `fluenTry`
+without pure java
 ```java
   int result;
   try {
