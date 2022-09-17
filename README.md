@@ -119,9 +119,9 @@ with pure java:
 ```
 with `fluenTry`
 ```java
-   Person person = new Person("Martin", "Odersky");
+   Person person     = new Person("Martin", "Odersky");
    JsonParser parser = new JsonParser();
-   boolean result = Try.evaluate(person, parser::toJson).ifThrowsThenGetDefaultOrElseMap(p -> true, false, JsonParsingException.class);
+   boolean result    = Try.evaluate(person, parser::toJson).ifThrowsThenGetDefaultOrElseMap(p -> true, false, JsonParsingException.class);
 ```
 
 # TO BE CONTINUED !!!
