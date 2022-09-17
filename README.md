@@ -2,6 +2,11 @@
 
 The main class in the library is called `Try`
 
+`Try` has a few overloaded static constructors for lazy computations which is called `Try.evaluate()`.
+`Try.evaluate()` may take `Runnable`, `Consumer<T> with argument`, `Callable<T>` or `Function<T, V with argument`
+
+`Try` has two sub-classes: `Succes<T>` and `Failure<Exception>` for representing successful and failed computations respectively.
+
 `Try<T>` class suggests a few methods for handling some common situations associated with try/catch procedures.
 These situations can be:
  * folding the computation with success `Function<T, V>` or client-defined default value.
