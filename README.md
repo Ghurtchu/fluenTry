@@ -11,8 +11,8 @@ The main class in the library is called `Try`
 These situations can be:
  * folding the computation with success `Function<T, V>` or client-defined default value.
  * finalizing computation with client-specific `Runnable` tasks.
- * catching client-specified exception and returning default value, or else continuing with success value.
- * catching client-specified exception and running some `Runnable` task afterwards, or else do nothing.
+ * catching client-specified exception and returning default value / throwin another exception, or else continuing with success value.
+ * catching client-specified exception and running some `Runnable` task afterwards / throwing another exception, or else do nothing.
 
 ### Examples below: 
 ### #1 `Try#fold` - Returns the value based on if the main computation succeeded or failed
