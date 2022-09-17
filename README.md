@@ -55,6 +55,6 @@ with pure java
 
 with `fluenTry`
 ```java
-  Try.evaluate(() -> List.of(1, 2, 3, 4, 5).get(100000)).fold(i -> i * i, 0);
+  int result = Try.evaluate(() -> List.of(1, 2, 3, 4, 5).get(100000)).fold(i -> i * i, 0);
 ```
 
