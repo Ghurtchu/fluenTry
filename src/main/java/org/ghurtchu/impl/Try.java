@@ -141,6 +141,13 @@ public abstract class Try<T> implements
         }
     }
 
+    /**
+     * Returns the value if the evaluation was successful, else runs the consumer and returns null
+     * consumer may do whatever client likes, log something, throw another exception (common)
+     * @param consumer   an exception consumer for running the task
+     * @param exceptions a user specified exception array some of which can be caught
+     */
+
     @Override
     @SafeVarargs
     public final T ifThrowsThenRunTaskOrElseGet(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
