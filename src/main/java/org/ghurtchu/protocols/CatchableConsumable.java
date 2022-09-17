@@ -9,3 +9,4 @@ public interface CatchableConsumable {
             Class<? extends Exception>... clientExceptions
     );
 }
+

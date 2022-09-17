@@ -6,13 +6,13 @@ import org.junit.Test;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ImpureCatchableMappableForFunctions {
+public class ImpureCatchableMappableForRunnables {
 
     @Test
     public void catchArithmeticExceptionAndThenThrowRuntimeException() {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
-            Try.evaluate(42, i -> i / 0)
+            Try.evaluate(() -> { throw new ArithmeticException(); })
                     .ifThrowsThenRunTask(err -> {
                         System.out.println("Could not divide!");
                         caught.set(true);
@@ -27,7 +27,7 @@ public class ImpureCatchableMappableForFunctions {
     public void catchOneExceptionAndThenThrowNullPointerException() {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
-            Try.evaluate(42, i -> i / 0)
+            Try.evaluate(() -> { throw new NoSuchElementException(); })
                     .ifThrowsThenRunTask(err -> {
                         System.out.println("Boom! could not divide");
                         caught.set(true);

@@ -159,13 +159,17 @@ public abstract class Try<T> implements
             parentExceptions.add(currentException);
             if (Arrays.stream(exceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
                 consumer.accept(failure.getValue());
-                return null;
+                return (T) new Object();
             } else {
                 throw new UncaughtException();
             }
         } else {
             Success<T> success = (Success<T>) this;
-            return success.getValue();
+            T value = success.getValue();
+            if (value == null) {
+                value = (T) new Object();
+            }
+            return value;
         }
     }
 
