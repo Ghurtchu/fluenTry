@@ -20,7 +20,11 @@ import java.util.function.Function;
  *  - catching user-specified exception and returning default value
  *  - catching user-specified exception and running some task afterwards
  */
-public abstract class Try<T> implements PureFoldable<T>, ImpureFinalizable, PureCatchableMappable<T>, ImpureCatchableRunnable {
+public abstract class Try<T> implements
+        PureFoldable<T>,
+        ImpureFinalizable,
+        PureCatchableMappable<T>,
+        ImpureCatchableRunnable {
 
     /**
      * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some Callable here]).
@@ -144,7 +148,7 @@ public abstract class Try<T> implements PureFoldable<T>, ImpureFinalizable, Pure
      */
     @SafeVarargs
     @Override
-    public final void ifThrowsThenRun(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
+    public final void ifThrowsCatchAndThenRun(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
         if (this instanceof Failure) {
             Failure failure = (Failure) this;
             Class<? extends Exception> currentException       = failure.getValue().getClass();
