@@ -70,5 +70,10 @@ public class FoldCallables {
         Assert.assertEquals(result, List.of(2, 4, 6, 8, 10));
     }
 
+    @Test
+    public void divide() {
+        Try.evaluate(() -> List.of(1, 2, 3, 4, 5).get(100000)).fold(i -> i * i, 0);
+    }
+
 
 }

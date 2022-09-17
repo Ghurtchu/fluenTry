@@ -13,7 +13,7 @@ public class ImpureCatchableMappableForCallables {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
             Try.evaluate(() -> 42 / 0)
-                    .ifThrowsCatchAndThenRun(err -> {
+                    .ifThrowsThenRunTask(err -> {
                         System.out.println("Could not divide!");
                         caught.set(true);
                         throw new RuntimeException();
@@ -28,7 +28,7 @@ public class ImpureCatchableMappableForCallables {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
             Try.evaluate(() -> 42 / 0)
-                    .ifThrowsCatchAndThenRun(err -> {
+                    .ifThrowsThenRunTask(err -> {
                         System.out.println("Boom! could not divide");
                         caught.set(true);
                         throw new NullPointerException();

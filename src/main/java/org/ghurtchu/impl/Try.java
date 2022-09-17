@@ -24,7 +24,8 @@ public abstract class Try<T> implements
         PureFoldable<T>,
         ImpureFinalizable,
         PureCatchableMappable<T>,
-        ImpureCatchableRunnable {
+        ImpureCatchableMappable<T>,
+        CatchableConsumable {
 
     /**
      * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some Callable here]).
@@ -118,18 +119,18 @@ public abstract class Try<T> implements
      * otherwise returns the successive value
      * @param successMapper a function for transforming success further, or else returning self by using Function.identity()
      * @param defaultValue  a default value to be returned in case of user-specified failure
-     * @param exceptions    a user specified exception array some of which can be caught
+     * @param clientExceptions    a user specified exception array some of which can be caught
      */
 
     @SafeVarargs
     @Override
-    public final <V> V ifThrowsThenGetDefaultOrElseMap(Function<? super T, ? extends V> successMapper, V defaultValue, Class<? extends Exception>... exceptions) {
+    public final <V> V ifThrowsThenGetDefaultOrElseMap(Function<? super T, ? extends V> successMapper, V defaultValue, Class<? extends Exception>... clientExceptions) {
         if (this instanceof Failure) {
             Failure failure = (Failure) this;
             Class<? extends Exception> currentException       = failure.getValue().getClass();
             List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failure.getValue());
             parentExceptions.add(currentException);
-            if (Arrays.stream(exceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
+            if (Arrays.stream(clientExceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
                 return defaultValue;
             } else {
                 throw new UncaughtException();
@@ -140,15 +141,9 @@ public abstract class Try<T> implements
         }
     }
 
-    /**
-     * Runs the user specified task if the evaluation procedure will catch
-     * at least one of the user-specified exceptions otherwise it won't run any tasks
-     * @param consumer  an exception consumer for running the task
-     * @param exceptions a user specified exceptions which can be caught
-     */
-    @SafeVarargs
     @Override
-    public final void ifThrowsCatchAndThenRun(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
+    @SafeVarargs
+    public final T ifThrowsThenRunTaskOrElseGet(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
         if (this instanceof Failure) {
             Failure failure = (Failure) this;
             Class<? extends Exception> currentException       = failure.getValue().getClass();
@@ -156,6 +151,32 @@ public abstract class Try<T> implements
             parentExceptions.add(currentException);
             if (Arrays.stream(exceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
                 consumer.accept(failure.getValue());
+                return null;
+            } else {
+                throw new UncaughtException();
+            }
+        } else {
+            Success<T> success = (Success<T>) this;
+            return success.getValue();
+        }
+    }
+
+    /**
+     * Runs the user specified task if the evaluation procedure will catch
+     * at least one of the user-specified exceptions otherwise it won't run any tasks
+     * @param errorConsumer  an exception consumer for running the task
+     * @param clientExceptions a user specified exceptions which can be caught
+     */
+    @SafeVarargs
+    @Override
+    public final void ifThrowsThenRunTask(Consumer<? super Exception> errorConsumer, Class<? extends Exception>... clientExceptions) {
+        if (this instanceof Failure) {
+            Failure failure = (Failure) this;
+            Class<? extends Exception> currentException       = failure.getValue().getClass();
+            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failure.getValue());
+            parentExceptions.add(currentException);
+            if (Arrays.stream(clientExceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
+                errorConsumer.accept(failure.getValue());
             }
         }
     }
