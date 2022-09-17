@@ -13,6 +13,7 @@ without `fluenTry`
   } catch (Exception e) {
       result = 0;
   }
+  return result;
 ```
 
 with `fluenTry`
