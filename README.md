@@ -38,3 +38,23 @@ with `fluenTry`
 ```java
   String result = Try.evaluate(() -> "A big enormous string".substring(0, 100000)).fold(Function.identity(), "Default String");
 ```
+
+try getting the element from the list, if it fails return 0, or else return the square of the success value
+
+with pure java
+```java
+    int result;
+    try {
+        int number = List.of(1, 2, 3, 4, 5).get(10000);
+        result = number * number;
+    } catch (Exception e) {
+        result = 0;
+    }
+    return result;
+```
+
+with `fluenTry`
+```java
+  Try.evaluate(() -> List.of(1, 2, 3, 4, 5).get(100000)).fold(i -> i * i, 0);
+```
+
