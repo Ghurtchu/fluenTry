@@ -1,7 +1,6 @@
-## `fluenTry` is a java library that enables you to handle common `try/catch` procedures in a declarative way.
-
-## Examples:
-#### `Try#fold` - Returns the value based on if the main computation succeeded or failed
+### `fluenTry` is a java library that enables you to handle common `try/catch` procedures in a declarative way.
+### Examples below: 
+### #1 `Try#fold` - Returns the value based on if the main computation succeeded or failed
 try division, if fails return 0, or multiply the result by 10
 
 with pure java
