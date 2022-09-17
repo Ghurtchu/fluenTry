@@ -102,7 +102,7 @@ with `fluenTry`
   Try.evaluate(() -> (String) new Object()).finalizeWith(() -> System.out.println("SUCCESS"), () -> System.out.println("FAILURE"));
 ```
 
-### #3 `Try#ifThrowsThenGetDefaultOrElseMap`- Returns the default value if the evaluation procedure will catch the user-specified exception otherwise returns the successive value which can be mapped further, basically it's a more constrained implementation of Try#fold with client-specified exceptions.
+### #3 `Try#ifThrowsThenGetDefaultOrElseMap`- Returns the default value if the evaluation procedure will catch the user-specified exception otherwise returns the successive value which can be mapped further, basically it's a more constrained implementation of `Try#fold` with client-specified exceptions.
 
 try parsing object into json, if it's successful return true else false
 
