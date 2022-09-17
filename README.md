@@ -34,6 +34,10 @@ with `fluenTry`
 ```java
 int result = Try.evaluate(() -> 42 / 0).fold(num -> num * 10, 0);
 ```
+or you can also fold `Function<T, V>` instances
+```java
+int result = Try.evaluate(42, i -> i / 0).fold(num -> num * 10, 0);
+```
 
 try extracting the substring, if it fails return "Default String" or else return the success
 
@@ -51,6 +55,10 @@ with pure java
 with `fluenTry`
 ```java
   String result = Try.evaluate(() -> "A big enormous string".substring(0, 100000)).fold(Function.identity(), "Default String");
+```
+or you can also fold `Function<T, V>` instances
+```java
+  String result = Try.evaluate("A big enormous string", s -> s.substring(0, 100000)).fold(Function.identity(), "Default String");
 ```
 
 try getting the element from the list, if it fails return 0, or else return the square of the success value
@@ -71,4 +79,7 @@ with `fluenTry`
 ```java
   int result = Try.evaluate(() -> List.of(1, 2, 3, 4, 5).get(100000)).fold(i -> i * i, 0);
 ```
-
+or you can also fold `Function<T, V>` instances
+```java
+  int result = Try.evaluate(List.of(1, 2, 3, 4, 5), list -> list.get(100000)).fold(i -> i * i, 0);
+```
