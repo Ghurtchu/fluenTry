@@ -1,4 +1,14 @@
-### `fluenTry` is a java library that enables you to handle common `try/catch` procedures in a declarative way.
+#### `fluenTry` is a java library that enables you to handle common `try/catch` procedures in a declarative way.
+
+The main class in the library is called `Try`
+
+`Try<T>` class suggests a few methods for handling some common situations associated with try/catch procedures.
+These situations can be:
+ * folding the computation with success `Function<T, V>` or client-defined default value.
+ * finalizing computation with client-specific `Runnable` tasks.
+ * catching client-specified exception and returning default value, or else continuing with success value.
+ * catching client-specified exception and running some `Runnable` task afterwards, or else do nothing.
+
 ### Examples below: 
 ### #1 `Try#fold` - Returns the value based on if the main computation succeeded or failed
 try division, if fails return 0, or multiply the result by 10
