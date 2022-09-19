@@ -79,7 +79,7 @@ with `fluenTry`:
 ```java
    public static Optional<Person> parseJson(String json) {
        var parser = new JsonParser<Person>();
-       return Try.of(json, parser::fromJson).toOption();
+       return Try.of(json, parser::fromJson).toOptional();
    }
 ```
 
