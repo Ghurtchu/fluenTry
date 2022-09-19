@@ -280,7 +280,7 @@ public abstract class Try<T> implements
      * Converts the Try instance to the Optional instance in order to continue working with other code that uses Optional.
      */
     @Override
-    public Optional<T> toOption() {
+    public Optional<T> toOptional() {
         if (this instanceof Success) {
             Success<T> success = (Success<T>) this;
             T value            = success.getValue();
