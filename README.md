@@ -29,7 +29,7 @@ try getting the element from the list, if it fails return 0, or else return the 
 
 with pure java
 ```java
-   public static int getAndThenDouble(List<Integer> list, int index) {
+   public static int getAndThenDoubleAndThenStringify(List<Integer> list, int index) {
        String result;
        try {
            int number = list.get(index);
@@ -43,8 +43,8 @@ with pure java
 
 with `fluenTry` - takes two arguments with `BiFunction` and is composed via `map` and `fold` combinators. May also take 3 args and `TriFunction`, but in rare cases :)
 ```java
-   public static int getAndThenDouble(List<Integer> list, int index) {
-       return Try.of(list, index, List::get).map(n -> n * 2).fold(Function.identity(), 0);
+   public static int getAndThenDoubleAndThenStringify(List<Integer> list, int index) {
+       return Try.of(list, index, List::get).map(n -> n * 2).fold(String::valueOf, "0");
    }
 ```
 
