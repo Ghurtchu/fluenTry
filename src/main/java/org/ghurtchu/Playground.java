@@ -16,6 +16,7 @@ public class Playground {
                 .flatMap(n -> Try.of(() -> 55 / 0)) // This is where the Success turns into Failure
                 .map(Math::sqrt);
 
+
         tryDouble.fold(Function.identity(), 0.0); // return success if success, else 0.0
 
     }

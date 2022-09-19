@@ -14,7 +14,7 @@ public class FinalizeConsumersWithRunnablesTest {
                     System.out.println("got " + i);
                     throw new RuntimeException();
                 })
-                .endWithTasks(
+                .endWith(
                         () -> System.out.println("Success!"),
                         () -> {
                             System.out.println("Failure :(");
@@ -29,7 +29,7 @@ public class FinalizeConsumersWithRunnablesTest {
         Try.of(42, (Integer i) -> {
                     System.out.println("got " + i);
                 })
-                .endWithTasks(
+                .endWith(
                         () -> {
                             System.out.println("Success!");
                             caughtException.set(true);

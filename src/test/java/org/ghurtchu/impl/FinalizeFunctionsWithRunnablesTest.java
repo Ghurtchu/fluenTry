@@ -11,7 +11,7 @@ public class FinalizeFunctionsWithRunnablesTest {
     public void finalizeWithFailureRunnable() {
         AtomicBoolean caughtException = new AtomicBoolean(false);
         Try.of(42, i -> i / 0)
-                .endWithTasks(
+                .endWith(
                         () -> System.out.println("Success!"),
                         () -> {
                             System.out.println("Failure :(");
@@ -24,7 +24,7 @@ public class FinalizeFunctionsWithRunnablesTest {
     public void finalizeWithSuccessRunnable() {
         AtomicBoolean caughtException = new AtomicBoolean(false);
         Try.of(42, i -> i + 1)
-                .endWithTasks(
+                .endWith(
                         () -> {
                             System.out.println("Success!");
                             caughtException.set(true);

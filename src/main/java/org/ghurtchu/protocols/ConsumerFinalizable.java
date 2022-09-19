@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 public interface ConsumerFinalizable<T> {
 
     void endWith(
-            Consumer<T> onSuccess,
-            Consumer<Exception> onFailure
+            Consumer<T> successConsumer,
+            Consumer<Exception> failureConsumer
     );
 }

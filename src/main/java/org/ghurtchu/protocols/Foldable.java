@@ -8,5 +8,4 @@ public interface Foldable<T> {
             Function<? super T, ? extends V> successMapper,
             V defaultValue
     );
-
 }

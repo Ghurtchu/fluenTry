@@ -3,30 +3,27 @@ package org.ghurtchu.impl;
 import org.ghurtchu.protocols.*;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
- * org.ghurtchu.impl.Try class is an abstraction for try/catch procedures.
- * org.ghurtchu.impl.Try class suggests a few methods for handling some common situations
- * associated with try/catch procedures.
- * These situations can be:
- *  - folding the computation with success function or default value
- *  - finalizing computation with Runnables
- *  - catching user-specified exception and returning default value
- *  - catching user-specified exception and running some task afterwards
+ * Try serves as an abstraction of try/catch procedures.
+ * It has two subclasses: Success and Failure which represent successful and failed computations.
+ * Success holds the value.
+ * Failure holds the exception.
+ * Try has a few methods for handling try/catch procedures in a declarative way.
+ * First type of methods are "combinators" which enable you to compose Try computations (map, flatMap, filter etc..)
+ * Second type of methods are "finalizers" which enable you to either extract the value from Try or register side-effecting functions (get, fold, endWith etc..)
  */
 public abstract class Try<T> implements
+        Extractable<T>,
+        Mappable<T>,
+        FlatMappable<T>,
+        Filterable<T>,
         Foldable<T>,
         RunnableFinalizable,
         ConsumerFinalizable<T>,
         PureCatchableMappable<T>,
         ImpureCatchableMappable<T>,
-        Mappable<T>,
-        FlatMappable<T>,
         ToOptionalConvertable<T>,
         CatchableConsumable {
 
@@ -35,23 +32,23 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some Callable here]).
-     * Returns either Success or Failure instance based on computation
-     * @param callable a lazy computation which is not evaluated on the call site, instead it's evaluated here.
+     * Try Constructor which takes the Supplier instance.
+     * Returns either Success or Failure instance based on the evaluation result of the computation.
+     * @param supplier a lazy computation which is not evaluated on the call site, instead it's evaluated here.
      */
-    public static <T> Try<T> of(Callable<? extends T> callable) {
+    public static <T> Try<T> of(Supplier<? extends T> supplier) {
         try {
-            return new Success<>(Optional.of(callable.call()));
+            return new Success<>(Optional.of(supplier.get()));
         } catch (Exception e) {
             return (Try<T>) new Failure(e);
         }
     }
 
     /**
-     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some Runnable here]).
-     * Returns either Success or Failure instance based on computation
+     * Try Constructor which takes Runnable instance.
+     * Returns either Success or Failure instance based on the evaluation result of the computation.
+     * It's mainly used for running side-effecting procedures, the Success return value is not so useful, however Failure value might be useful.
      * @param runnable a lazy task which is not evaluated on the call site, instead it's evaluated here.
-     *
      */
     public static <T> Try<T> of(Runnable runnable) {
         try {
@@ -63,10 +60,11 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some Consumer here][some argument here]).
-     * Returns either Success or Failure instance based on computation
+     * Try Constructor which takes an argument for the Consumer and a Consumer instance itself.
+     * Returns either Success or Failure instance based on computation.
+     * It's mainly used for running side-effecting procedures, the Success return value is not so useful, however Failure value might be useful.
+     * @param arg      an argument for Consumer.
      * @param consumer a lazy single-param function value which consumes argument for side effects. It's not evaluated on the call site, instead it's evaluated here.
-     *
      */
     public static <T> Try<T> of(T arg, Consumer<T> consumer) {
         try {
@@ -78,10 +76,10 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some argument here][some Function here]).
-     * Returns either Success or Failure instance based on computation
+     * Try Constructor which takes an argument for the Function and a Function instance itself.
+     * Returns either Success or Failure instance based on computation.
+     * @param arg      an argument for Function.
      * @param function a function value which consumes argument and may succeed or fail. It's not evaluated on the call site, instead it's evaluated here.
-     *
      */
     public static <T, V> Try<V> of(T arg, Function<T, ? extends V> function) {
         try {
@@ -92,10 +90,11 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([args here][BiFunction here]).
-     * Returns either Success or Failure instance based on computation
-     * @param biFunction a bi-function value which consumes two arguments and may succeed or fail. It's not evaluated on the call site, instead it's evaluated here.
-     *
+     * Try Constructor which takes two arguments for the BiFunction and a BiFunction instance itself.
+     * Returns either Success or Failure instance based on computation.
+     * @param arg1       the first argument for BiFunction.
+     * @param arg2       the second argument for BiFunction.
+     * @param biFunction a BiFunction value which consumes two arguments and may succeed or fail. It's not evaluated on the call site, instead it's evaluated here.
      */
     public static <T, U, V> Try<V> of (T arg1, U arg2, BiFunction<T, U, ? extends V> biFunction) {
         try {
@@ -106,17 +105,18 @@ public abstract class Try<T> implements
     }
 
     /**
-     * get can be used to retrieve the content of Try, but be wary! Failure case will throw an exception
+     * get can be used to retrieve the content of Try, but be wary! Failure case will throw an exception.
      */
-    public T get() {
+    @Override
+    public final T get() {
         if (this instanceof Success)
             return this.getValue();
         throw new NoSuchElementException(((Exception) this.getValue()).getMessage());
     }
 
     /**
-     * map can be used to transform the result of the computation inside, it either succeeds with Success(transformed) or else returns Failure(exception)
-     * @param mapper a function which transforms the inner content of Try and returns a new Try
+     * map can be used to transform the result of the computation inside, it either succeeds with Success(transformed) or else returns Failure(exception).
+     * @param mapper a function which transforms the inner content of Try and returns a new Try.
      */
     @Override
     public final <V> Try<V> map(Function<? super T, ? extends V> mapper) {
@@ -134,8 +134,8 @@ public abstract class Try<T> implements
     }
 
     /**
-     * flatMap is almost the same as map, although it can be used to chain Try computations one after another
-     * @param flatMapper a function which transforms the inner content of Try and returns a new Try
+     * flatMap is almost the same as map, although it can be used to chain Try computations one after another.
+     * @param flatMapper a function which transforms the inner content of Try and returns a new Try.
      */
     @Override
     public final <V> Try<V> flatMap(Function<? super T, ? extends Try<V>> flatMapper) {
@@ -153,9 +153,10 @@ public abstract class Try<T> implements
     }
 
     /**
-     * filter can be used to filter the content of Try, if successful it returns new Success, or else Failure(exception)
-     * @param predicate a function which checks whether the content of Try conforms to a certain property
+     * filter can be used to filter the content of Try, if successful it returns new Success, or else Failure(exception).
+     * @param predicate a function which checks whether the content of Try conforms to a certain property.
      */
+    @Override
     public final Try<T> filter(Predicate<? super T> predicate) {
         if (this instanceof Success) {
             Success<T> success = (Success<T>) this;
@@ -173,9 +174,9 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Returns the value based on if the main computation succeeded or failed
-     * @param successMapper a function which can transform the successful value, or leave it as it is (Function.identity())
-     * @param defaultValue  a default value which will be returned if the computation fails
+     * Returns the value based on if the main computation succeeded or failed.
+     * @param successMapper a function which can transform the successful value, or leave it as it is (Function.identity()).
+     * @param defaultValue  a default value which will be returned if the computation fails.
      */
     @Override
     public final <V> V fold(Function<? super T, ? extends V> successMapper, V defaultValue) {
@@ -192,12 +193,12 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Runs the tasks based on if the main computation succeeded or failed
-     * @param onSuccess a runnable which will be executed in case of successful computation
-     * @param onFailure a runnable which will be executed in case of failed computation
+     * Runs the tasks based on if the main computation succeeded or failed.
+     * @param onSuccess a runnable which will be executed in case of successful computation.
+     * @param onFailure a runnable which will be executed in case of failed computation.
      */
     @Override
-    public final void endWithTasks(Runnable onSuccess, Runnable onFailure) {
+    public final void endWith(Runnable onSuccess, Runnable onFailure) {
         if (this instanceof Success) {
             onSuccess.run();
         } else {
@@ -205,23 +206,27 @@ public abstract class Try<T> implements
         }
     }
 
+    /**
+     * Runs the consumers based on if the main computation succeeded or failed.
+     * @param successConsumer a consumer instance for success case.
+     * @param failureConsumer a consumer instance for failed case.
+     */
     @Override
-    public final void endWith(Consumer<T> onSuccess, Consumer<Exception> onFailure) {
+    public final void endWith(Consumer<T> successConsumer, Consumer<Exception> failureConsumer) {
         if (this instanceof Success) {
-            onSuccess.accept(this.getValue());
+            successConsumer.accept(this.getValue());
         } else {
-            onFailure.accept((Exception) this.getValue());
+            failureConsumer.accept((Exception) this.getValue());
         }
     }
 
     /**
-     * Returns the default value if the evaluation procedure will catch the user-specified exception
-     * otherwise returns the successive value
-     * @param successMapper a function for transforming success further, or else returning self by using Function.identity()
-     * @param defaultValue  a default value to be returned in case of user-specified failure
-     * @param clientExceptions    a user specified exception array some of which can be caught
+     * Returns the default value if the evaluation procedure will catch the user-specified exception,
+     * otherwise returns the successive value which can be mapped further into different values.
+     * @param successMapper    a function for transforming success further, or else returning self by using Function.identity().
+     * @param defaultValue     a default value to be returned in case of user-specified failure.
+     * @param clientExceptions a user specified exception array some of which can be caught.
      */
-
     @SafeVarargs
     @Override
     public final <V> V ifThrowsThenGetDefaultOrElseMap(Function<? super T, ? extends V> successMapper, V defaultValue, Class<? extends Exception>... clientExceptions) {
@@ -247,7 +252,6 @@ public abstract class Try<T> implements
      * @param consumer   an exception consumer for running the task
      * @param exceptions a user specified exception array some of which can be caught
      */
-
     @Override
     @SafeVarargs
     public final T ifThrowsThenRunTaskOrElseGet(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
@@ -272,6 +276,9 @@ public abstract class Try<T> implements
         }
     }
 
+    /**
+     * Converts the Try instance to the Optional instance in order to continue working with other code that uses Optional.
+     */
     @Override
     public Optional<T> toOption() {
         if (this instanceof Success) {
@@ -288,8 +295,7 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Runs the user specified task if the evaluation procedure will catch
-     * at least one of the user-specified exceptions otherwise it won't run any tasks
+     * Runs the user specified task if the evaluation procedure will catch at least one of the user-specified exceptions otherwise it won't run any tasks.
      * @param errorConsumer  an exception consumer for running the task
      * @param clientExceptions a user specified exceptions which can be caught
      */
@@ -341,7 +347,7 @@ public abstract class Try<T> implements
     }
 
     /**
-     * A failed case which ensapsulates the failed computation
+     * A failed case which encapsulates the failed computation
      */
     private static final class Failure extends Try<Exception> {
 
@@ -375,9 +381,16 @@ public abstract class Try<T> implements
         }
     }
 
+    /**
+     * The utility class for working with secondary matters.
+     */
     private static class TryUtils {
 
-        public static List<Class<? extends Exception>>getParentExceptions(Exception exception) {
+        /**
+         * returns the list of parent exceptions for a given exception
+         * @param exception an exception
+         */
+        public static List<Class<? extends Exception>> getParentExceptions(Exception exception) {
             List<Class<? extends Exception>> superExceptions = new ArrayList<>();
             Class<?> superExc                                = exception.getClass().getSuperclass();
             while (true) {
