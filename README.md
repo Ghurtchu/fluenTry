@@ -82,6 +82,42 @@ with `fluenTry`:
        return Try.of(json, parser::fromJson).toOption();
    }
 ```
+
+Let's see something related to java Enums:
+
+```java
+    public enum Weekend {
+    
+        SATURDAY,
+        SUNDAY;
+
+        public static boolean isWeekend(String day) {
+            try {
+                String normalized = day.trim().toUpperCase();
+                Weekend.valueOf(normalized);
+                return true;
+            } catch (IllegalArgumentException iae) {
+                return false;
+            }
+        }
+
+   }
+```
+
+with `fluenTry:`
+
+```java
+    public enum Weekend {
+    
+        SATURDAY,
+        SUNDAY;
+
+        public static boolean isWeekend(String day) {
+            return Try.of(() -> day.trim().toUpperCase()).map(Weekend::valueOf).fold(d -> true, false);
+        }
+   }
+```   
+
 # TO BE CONTINUED !!!
 
 
