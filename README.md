@@ -6,13 +6,13 @@ and in the end we run it. Java has somewhat decent support for functional style 
 The main class in the library is called `Try`
 
 `Try` has a few overloaded static constructors for lazy computations which is called `Try.of()`.
-`Try.of()` may take `Runnable`, `Consumer<T> with arg`, `Callable<T>` or `Function<T, V> with arg`
+`Try.of()` may take `Runnable`, `Consumer<T> with arg`, `Callable<T>` or `Function<T, V> with arg` and `BiFunction<T, U, V> with two args`
 
-`Try` has two sub-classes: `Success<T>` which holds the successful value and `Failure` which holds the exception. These two subtypes represent successful and failed computations respectively.
+`Try` has two sub-classes: `Success<T>` which holds the successful value and `Failure` which holds the exception.
 
 `Try<T>` can be used in two ways:
-  - composing potentially fallible computations with the help of functions
-  - finalizing the description of computation with side-effecting functions
+  - composing potentially fallible computations with the help of combinators such as `map`, `flatMap`, `filter`.
+  - finalizing the Try computations by either extracting the inner value of Try or running any side-effecting functions: `get`, `fold`, `endWith` and many others. 
 
 `Try<T>` class suggests a few methods for handling some common situations associated with try/catch procedures.
 These situations can be:
@@ -59,28 +59,29 @@ Failed computation which returns Failure(ArithmeticException) instead of blowing
            .fold(Function.identity(), 0.0); // but with the help of `fold` combinator we turn that into pure value (0.0)
 ```
 
-### #3 `Try#ifThrowsThenGetDefaultOrElseMap`- Returns the default value if the evaluation procedure will catch the user-specified exception otherwise returns the successive value which can be mapped further, basically it's a more constrained implementation of `Try#fold` with client-specified exceptions.
-
-try parsing object into json, if it's successful return true else false
+Let's see another example:
 
 with pure java:
 ```java
-    Person person     = new Person("Martin", "Odersky");
-    JsonParser parser = new JsonParser();
-    try {
-        parser.toJson(person);
-        return true;
-    } catch (JsonParsingException jpe) {
-        return false;
-    }
-```
-with `fluenTry`
-```java
-   Person person     = new Person("Martin", "Odersky");
-   JsonParser parser = new JsonParser();
-   boolean result    = Try.evaluate(person, parser::toJson).ifThrowsThenGetDefaultOrElseMap(p -> true, false, JsonParsingException.class);
+   public static Optional<Person> parseJson(String json) {
+       var jsonParser = new JsonParser<Person>();
+       Optional<Person> result;
+       try {
+           result = Optional.of(jsonParser.fromJson(json));
+       } catch (JsonParsingException jpe) {
+           result = Optional.empty();
+       }
+       return result;
+   }
 ```
 
+with `fluenTry`:
+```java
+   public static Optional<Person> parseJson(String json) {
+       var parser = new JsonParser<Person>();
+       return Try.of(json, parser::fromJson).toOption();
+   }
+```
 # TO BE CONTINUED !!!
 
 
