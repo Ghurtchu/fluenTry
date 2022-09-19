@@ -314,6 +314,27 @@ public abstract class Try<T> implements
     }
 
     /**
+     * Returns true if the computation succeeded
+     */
+    public boolean isSuccess() {
+        return this instanceof Success;
+    }
+
+    /**
+     * Returns true of the computation failed
+     */
+    public boolean isFailure() {
+        return !isSuccess();
+    }
+
+    /**
+     * Returns a new successful value wrapped in Try if the preceding computations fail
+     */
+    public Try<T> orElse(T value) {
+        return new Success<>(Optional.of(value));
+    }
+
+    /**
      * abstract method which must be implemented by the children of org.ghurtchu.impl.Try
      */
     protected abstract T getValue();
