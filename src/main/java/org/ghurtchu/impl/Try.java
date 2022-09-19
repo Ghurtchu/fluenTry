@@ -2,6 +2,7 @@ package org.ghurtchu.impl;
 
 import org.ghurtchu.protocols.*;
 
+import java.awt.datatransfer.FlavorTable;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -22,6 +23,8 @@ public abstract class Try<T> implements
         ImpureFinalizable,
         PureCatchableMappable<T>,
         ImpureCatchableMappable<T>,
+        Mappable<T>,
+        FlatMappable<T>,
         CatchableConsumable {
 
     /**
@@ -81,6 +84,34 @@ public abstract class Try<T> implements
         }
     }
 
+    public final <V> Try<V> map(Function<? super T, ? extends V> mapper) {
+        if (this instanceof Success) {
+            Success<T> success = (Success<T>) this;
+            T value            = success.getValue();
+            try {
+                return new Success<>(Optional.of(mapper.apply(value)));
+            } catch (Exception e) {
+                return (Try<V>) new Failure(e);
+            }
+        } else {
+            return (Try<V>) this;
+        }
+    }
+
+    @Override
+    public final <V> Try<V> flatMap(Function<? super T, ? extends Try<V>> mapper) {
+        if (this instanceof Success) {
+            Success<T> success = (Success<T>) this;
+            T value            = success.getValue();
+            try {
+                return mapper.apply(value);
+            } catch (Exception e) {
+                return (Try<V>) new Failure(e);
+            }
+        } else {
+            return (Try<V>) this;
+        }
+    }
 
     /**
      * Returns the value based on if the main computation succeeded or failed
@@ -217,6 +248,13 @@ public abstract class Try<T> implements
                 return null;
             }
         }
+
+        @Override
+        public String toString() {
+            return "Success{" +
+                    "value=" + value +
+                    '}';
+        }
     }
 
     /**
@@ -235,6 +273,12 @@ public abstract class Try<T> implements
             return exception;
         }
 
+        @Override
+        public String toString() {
+            return "Failure{" +
+                    "exception=" + exception +
+                    '}';
+        }
     }
 
     /**
