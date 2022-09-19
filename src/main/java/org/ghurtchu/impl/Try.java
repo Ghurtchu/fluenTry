@@ -28,12 +28,16 @@ public abstract class Try<T> implements
         FlatMappable<T>,
         CatchableConsumable {
 
+    private Try () {
+
+    }
+
     /**
      * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some Callable here]).
      * Returns either Success or Failure instance based on computation
      * @param callable a lazy computation which is not evaluated on the call site, instead it's evaluated here.
      */
-    public static <T> Try<T> run(Callable<? extends T> callable) {
+    public static <T> Try<T> evaluate(Callable<? extends T> callable) {
         try {
             return new Success<>(Optional.of(callable.call()));
         } catch (Exception e) {
@@ -47,7 +51,7 @@ public abstract class Try<T> implements
      * @param runnable a lazy task which is not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T> Try<T> run(Runnable runnable) {
+    public static <T> Try<T> evaluate(Runnable runnable) {
         try {
             runnable.run();
             return new Success<>(Optional.empty());
@@ -62,7 +66,7 @@ public abstract class Try<T> implements
      * @param consumer a lazy single-param function value which consumes argument for side effects. It's not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T> Try<T> run(T arg, Consumer<T> consumer) {
+    public static <T> Try<T> evaluate(T arg, Consumer<T> consumer) {
         try {
             consumer.accept(arg);
             return new Success<>(Optional.empty());
@@ -77,7 +81,7 @@ public abstract class Try<T> implements
      * @param function a function value which consumes argument and may succeed or fail. It's not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T, V> Try<V> run(T arg, Function<T, ? extends V> function) {
+    public static <T, V> Try<V> evaluate(T arg, Function<T, ? extends V> function) {
         try {
             return new Success<>(Optional.of(function.apply(arg)));
         } catch (Exception e) {

@@ -12,7 +12,7 @@ public class ImpureCatchableMappableForFunctionsTest {
     public void catchArithmeticExceptionAndThenThrowRuntimeException() {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
-            Try.run(42, i -> i / 0)
+            Try.evaluate(42, i -> i / 0)
                     .ifThrowsThenRunTask(err -> {
                         System.out.println("Could not divide!");
                         caught.set(true);
@@ -27,7 +27,7 @@ public class ImpureCatchableMappableForFunctionsTest {
     public void catchOneExceptionAndThenThrowNullPointerException() {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
-            Try.run(42, i -> i / 0)
+            Try.evaluate(42, i -> i / 0)
                     .ifThrowsThenRunTask(err -> {
                         System.out.println("Boom! could not divide");
                         caught.set(true);

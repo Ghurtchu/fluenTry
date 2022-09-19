@@ -7,7 +7,7 @@ public class PureCatchableMappableForRunnablesTest {
 
     @Test
     public void getDefault() {
-        int result = Try.run(() -> { throw new ArithmeticException(); })
+        int result = Try.evaluate(() -> { throw new ArithmeticException(); })
                 .ifThrowsThenGetDefaultOrElseMap(
                         obj -> 1,
                         0,
@@ -17,7 +17,7 @@ public class PureCatchableMappableForRunnablesTest {
 
     @Test
     public void getOne() {
-        int result = Try.run(() -> {})
+        int result = Try.evaluate(() -> {})
                 .ifThrowsThenGetDefaultOrElseMap(
                         obj -> 1,
                         0,
