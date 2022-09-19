@@ -2,11 +2,11 @@ package org.ghurtchu.impl;
 
 import org.ghurtchu.protocols.*;
 
-import java.awt.datatransfer.FlavorTable;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * org.ghurtchu.impl.Try class is an abstraction for try/catch procedures.
@@ -19,8 +19,9 @@ import java.util.function.Function;
  *  - catching user-specified exception and running some task afterwards
  */
 public abstract class Try<T> implements
-        PureFoldable<T>,
-        ImpureFinalizable,
+        Foldable<T>,
+        RunnableFinalizable,
+        ConsumerFinalizable<T>,
         PureCatchableMappable<T>,
         ImpureCatchableMappable<T>,
         Mappable<T>,
@@ -32,7 +33,7 @@ public abstract class Try<T> implements
      * Returns either Success or Failure instance based on computation
      * @param callable a lazy computation which is not evaluated on the call site, instead it's evaluated here.
      */
-    public static <T> Try<T> evaluate(Callable<? extends T> callable) {
+    public static <T> Try<T> run(Callable<? extends T> callable) {
         try {
             return new Success<>(Optional.of(callable.call()));
         } catch (Exception e) {
@@ -46,7 +47,7 @@ public abstract class Try<T> implements
      * @param runnable a lazy task which is not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T> Try<T> evaluate(Runnable runnable) {
+    public static <T> Try<T> run(Runnable runnable) {
         try {
             runnable.run();
             return new Success<>(Optional.empty());
@@ -61,7 +62,7 @@ public abstract class Try<T> implements
      * @param consumer a lazy single-param function value which consumes argument for side effects. It's not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T> Try<T> evaluate(T arg, Consumer<T> consumer) {
+    public static <T> Try<T> run(T arg, Consumer<T> consumer) {
         try {
             consumer.accept(arg);
             return new Success<>(Optional.empty());
@@ -76,7 +77,7 @@ public abstract class Try<T> implements
      * @param function a function value which consumes argument and may succeed or fail. It's not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T, V> Try<V> evaluate(T arg, Function<T, ? extends V> function) {
+    public static <T, V> Try<V> run(T arg, Function<T, ? extends V> function) {
         try {
             return new Success<>(Optional.of(function.apply(arg)));
         } catch (Exception e) {
@@ -84,6 +85,12 @@ public abstract class Try<T> implements
         }
     }
 
+
+    /**
+     * map can be used to transform the result of the computation inside, it either succeeds with Success(transformed) or else returns Failure(exception)
+     * @param mapper a function which transforms the inner content of Try and returns a new Try
+     */
+    @Override
     public final <V> Try<V> map(Function<? super T, ? extends V> mapper) {
         if (this instanceof Success) {
             Success<T> success = (Success<T>) this;
@@ -98,18 +105,42 @@ public abstract class Try<T> implements
         }
     }
 
+    /**
+     * flatMap is almost the same as map, although it can be used to chain Try computations one after another
+     * @param flatMapper a function which transforms the inner content of Try and returns a new Try
+     */
     @Override
-    public final <V> Try<V> flatMap(Function<? super T, ? extends Try<V>> mapper) {
+    public final <V> Try<V> flatMap(Function<? super T, ? extends Try<V>> flatMapper) {
         if (this instanceof Success) {
             Success<T> success = (Success<T>) this;
             T value            = success.getValue();
             try {
-                return mapper.apply(value);
+                return flatMapper.apply(value);
             } catch (Exception e) {
                 return (Try<V>) new Failure(e);
             }
         } else {
             return (Try<V>) this;
+        }
+    }
+
+    /**
+     * filter can be used to filter the content of Try, if successful it returns new Success, or else Failure(exception)
+     * @param predicate a function which checks whether the content of Try conforms to a certain property
+     */
+    public final Try<T> filter(Predicate<? super T> predicate) {
+        if (this instanceof Success) {
+            Success<T> success = (Success<T>) this;
+            T value            = success.getValue();
+            try {
+                return predicate.test(value)
+                        ? new Success<>(Optional.of(this.getValue()))
+                        : (Try<T>) new Failure(new NoSuchElementException("predicate does not hold for " + value));
+            } catch (Exception e) {
+                return (Try<T>) new Failure(e);
+            }
+        } else {
+            return this;
         }
     }
 
@@ -138,11 +169,20 @@ public abstract class Try<T> implements
      * @param onFailure a runnable which will be executed in case of failed computation
      */
     @Override
-    public final void finalizeWith(Runnable onSuccess, Runnable onFailure) {
+    public final void endWithTasks(Runnable onSuccess, Runnable onFailure) {
         if (this instanceof Success) {
             onSuccess.run();
         } else {
             onFailure.run();
+        }
+    }
+
+    @Override
+    public final void endWith(Consumer<T> onSuccess, Consumer<Exception> onFailure) {
+        if (this instanceof Success) {
+            onSuccess.accept(this.getValue());
+        } else {
+            onFailure.accept((Exception) this.getValue());
         }
     }
 

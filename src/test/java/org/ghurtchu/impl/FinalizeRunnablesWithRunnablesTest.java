@@ -10,8 +10,8 @@ public class FinalizeRunnablesWithRunnablesTest {
     @Test
     public void finalizeWithFailureRunnable() {
         AtomicBoolean caughtException = new AtomicBoolean(false);
-        Try.evaluate(() -> { throw new RuntimeException(); })
-                .finalizeWith(
+        Try.run(() -> { throw new RuntimeException(); })
+                .endWithTasks(
                         () -> System.out.println("Success!"),
                         () -> {
                             System.out.println("Failure :(");
@@ -23,8 +23,8 @@ public class FinalizeRunnablesWithRunnablesTest {
     @Test
     public void finalizeWithSuccessRunnable() {
         AtomicBoolean caughtException = new AtomicBoolean(false);
-        Try.evaluate(() -> {})
-                .finalizeWith(
+        Try.run(() -> {})
+                .endWithTasks(
                         () -> {
                             System.out.println("Success!");
                             caughtException.set(true);

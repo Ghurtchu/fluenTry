@@ -7,7 +7,7 @@ public class PureCatchableMappableForConsumersTest {
 
     @Test
     public void getDefault() {
-        int result = Try.evaluate(42, (Integer i) -> { throw new ArithmeticException(); })
+        int result = Try.run(42, (Integer i) -> { throw new ArithmeticException(); })
                 .ifThrowsThenGetDefaultOrElseMap(
                         obj -> 1,
                         0,
@@ -17,7 +17,7 @@ public class PureCatchableMappableForConsumersTest {
 
     @Test
     public void getOne() {
-        int result = Try.evaluate(42, (Integer i) -> {})
+        int result = Try.run(42, (Integer i) -> {})
                 .ifThrowsThenGetDefaultOrElseMap(
                         obj -> 1,
                         0,

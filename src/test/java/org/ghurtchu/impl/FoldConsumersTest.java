@@ -9,7 +9,7 @@ public class FoldConsumersTest {
 
     @Test
     public void failAndHealWithZero() {
-        int result = Try.evaluate(42, (Integer i) -> {
+        int result = Try.run(42, (Integer i) -> {
             System.out.println("got " + i);
             throw new RuntimeException("something bad happened");
         }).fold(obj -> 1, 0);
@@ -18,7 +18,7 @@ public class FoldConsumersTest {
 
     @Test
     public void succeedWithEmptyObject() {
-        Object success = Try.evaluate(100, (Integer i) -> {
+        Object success = Try.run(100, (Integer i) -> {
             System.out.println("got " + i);
         }).fold(Function.identity(), 0);
         Assert.assertTrue(success != null);
@@ -26,7 +26,7 @@ public class FoldConsumersTest {
 
     @Test
     public void failAndHealWithString() {
-        String result = Try.evaluate("Stay hydrated!", (String s) -> {
+        String result = Try.run("Stay hydrated!", (String s) -> {
             System.out.println("got " + s);
             throw new RuntimeException("something bad happened");
         }).fold(obj -> "???", "String");

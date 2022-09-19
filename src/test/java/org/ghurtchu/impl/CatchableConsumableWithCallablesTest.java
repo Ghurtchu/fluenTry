@@ -8,7 +8,7 @@ public class CatchableConsumableWithCallablesTest {
     @Test
     public void failAndThrowRuntimeException() {
         try {
-            Try.evaluate(() -> 5 / 0)
+            Try.run(() -> 5 / 0)
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("Could not divide 5 by 0");
                         throw new RuntimeException("boom");
@@ -21,7 +21,7 @@ public class CatchableConsumableWithCallablesTest {
     @Test
     public void succeedWithValue() {
         try {
-            int result = Try.evaluate(() -> 10 / 2)
+            int result = Try.run(() -> 10 / 2)
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("Could not divide 10 by 2");
                         throw new RuntimeException("boom");

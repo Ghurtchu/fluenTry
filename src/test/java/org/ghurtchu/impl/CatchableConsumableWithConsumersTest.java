@@ -8,7 +8,7 @@ public class CatchableConsumableWithConsumersTest {
     @Test
     public void failAndThrowRuntimeException() {
         try {
-            Try.evaluate(42, (Integer i) -> { throw new ArithmeticException(); })
+            Try.run(42, (Integer i) -> { throw new ArithmeticException(); })
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("Something went wrong");
                         throw new RuntimeException("boom");
@@ -21,7 +21,7 @@ public class CatchableConsumableWithConsumersTest {
     @Test
     public void succeedWithValue() {
         try {
-            Object object = Try.evaluate(42, (Integer i) -> {})
+            Object object = Try.run(42, (Integer i) -> {})
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("boom " + err.getMessage());
                         throw new RuntimeException("boom");

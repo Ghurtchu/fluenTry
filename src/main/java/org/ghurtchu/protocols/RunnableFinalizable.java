@@ -1,8 +1,8 @@
 package org.ghurtchu.protocols;
 
-public interface ImpureFinalizable {
+public interface RunnableFinalizable {
 
-    void finalizeWith(
+    void endWithTasks(
             Runnable onSuccess,
             Runnable onFailure
     );
