@@ -12,7 +12,7 @@ public class ImpureCatchableMappableForConsumersTest {
     public void catchArithmeticExceptionAndThenThrowRuntimeException() {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
-            Try.evaluate(42, (Integer i) -> {
+            Try.of(42, (Integer i) -> {
                         System.out.println("got " + i);
                         throw new RuntimeException("boom");
                     })
@@ -30,7 +30,7 @@ public class ImpureCatchableMappableForConsumersTest {
     public void catchOneExceptionAndThenThrowNullPointerException() {
         AtomicBoolean caught = new AtomicBoolean(false);
         try {
-            Try.evaluate(42, (Integer i) -> {
+            Try.of(42, (Integer i) -> {
                         System.out.println("got " + i);
                     })
                     .ifThrowsThenRunTask(err -> {

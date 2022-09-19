@@ -4,6 +4,7 @@ import org.ghurtchu.protocols.*;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -26,6 +27,7 @@ public abstract class Try<T> implements
         ImpureCatchableMappable<T>,
         Mappable<T>,
         FlatMappable<T>,
+        ToOptionalConvertable<T>,
         CatchableConsumable {
 
     private Try () {
@@ -37,7 +39,7 @@ public abstract class Try<T> implements
      * Returns either Success or Failure instance based on computation
      * @param callable a lazy computation which is not evaluated on the call site, instead it's evaluated here.
      */
-    public static <T> Try<T> evaluate(Callable<? extends T> callable) {
+    public static <T> Try<T> of(Callable<? extends T> callable) {
         try {
             return new Success<>(Optional.of(callable.call()));
         } catch (Exception e) {
@@ -51,7 +53,7 @@ public abstract class Try<T> implements
      * @param runnable a lazy task which is not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T> Try<T> evaluate(Runnable runnable) {
+    public static <T> Try<T> of(Runnable runnable) {
         try {
             runnable.run();
             return new Success<>(Optional.empty());
@@ -66,7 +68,7 @@ public abstract class Try<T> implements
      * @param consumer a lazy single-param function value which consumes argument for side effects. It's not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T> Try<T> evaluate(T arg, Consumer<T> consumer) {
+    public static <T> Try<T> of(T arg, Consumer<T> consumer) {
         try {
             consumer.accept(arg);
             return new Success<>(Optional.empty());
@@ -76,12 +78,12 @@ public abstract class Try<T> implements
     }
 
     /**
-     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some Function here][some argument here]).
+     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([some argument here][some Function here]).
      * Returns either Success or Failure instance based on computation
      * @param function a function value which consumes argument and may succeed or fail. It's not evaluated on the call site, instead it's evaluated here.
      *
      */
-    public static <T, V> Try<V> evaluate(T arg, Function<T, ? extends V> function) {
+    public static <T, V> Try<V> of(T arg, Function<T, ? extends V> function) {
         try {
             return new Success<>(Optional.of(function.apply(arg)));
         } catch (Exception e) {
@@ -89,6 +91,28 @@ public abstract class Try<T> implements
         }
     }
 
+    /**
+     * Some org.ghurtchu.impl.Try computations may start with calling org.ghurtchu.impl.Try.evaluate([args here][BiFunction here]).
+     * Returns either Success or Failure instance based on computation
+     * @param biFunction a bi-function value which consumes two arguments and may succeed or fail. It's not evaluated on the call site, instead it's evaluated here.
+     *
+     */
+    public static <T, U, V> Try<V> of (T arg1, U arg2, BiFunction<T, U, ? extends V> biFunction) {
+        try {
+            return new Success<>(Optional.of(biFunction.apply(arg1, arg2)));
+        } catch (Exception e) {
+            return (Try<V>) new Failure(e);
+        }
+    }
+
+    /**
+     * get can be used to retrieve the content of Try, but be wary! Failure case will throw an exception
+     */
+    public T get() {
+        if (this instanceof Success)
+            return this.getValue();
+        throw new NoSuchElementException(((Exception) this.getValue()).getMessage());
+    }
 
     /**
      * map can be used to transform the result of the computation inside, it either succeeds with Success(transformed) or else returns Failure(exception)
@@ -245,6 +269,21 @@ public abstract class Try<T> implements
                 value = (T) new Object();
             }
             return value;
+        }
+    }
+
+    @Override
+    public Optional<T> toOption() {
+        if (this instanceof Success) {
+            Success<T> success = (Success<T>) this;
+            T value            = success.getValue();
+            if (value == null) {
+                return Optional.empty();
+            } else {
+                return Optional.of(value);
+            }
+        } else {
+            return Optional.empty();
         }
     }
 

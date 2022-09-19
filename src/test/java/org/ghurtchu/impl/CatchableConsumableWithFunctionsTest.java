@@ -8,7 +8,7 @@ public class CatchableConsumableWithFunctionsTest {
     @Test
     public void failAndThrowRuntimeException() {
         try {
-            Try.evaluate(5, i -> i / 0)
+            Try.of(5, i -> i / 0)
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("Could not divide 5 by 0");
                         throw new RuntimeException("boom");
@@ -21,7 +21,7 @@ public class CatchableConsumableWithFunctionsTest {
     @Test
     public void succeedWithValue() {
         try {
-            int result = Try.evaluate(10, i -> i / 2)
+            int result = Try.of(10, i -> i / 2)
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("Could not divide 10 by 2");
                         throw new RuntimeException("boom");

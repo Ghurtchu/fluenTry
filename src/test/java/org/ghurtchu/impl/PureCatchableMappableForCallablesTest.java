@@ -9,7 +9,7 @@ public class PureCatchableMappableForCallablesTest {
 
     @Test
     public void getDefault() {
-        int result = Try.evaluate(() -> 42 / 0)
+        int result = Try.of(() -> 42 / 0)
                 .ifThrowsThenGetDefaultOrElseMap(
                         Function.identity(),
                         0,
@@ -19,7 +19,7 @@ public class PureCatchableMappableForCallablesTest {
 
     @Test
     public void getSelf() {
-        int result = Try.evaluate(() -> 42 / 1)
+        int result = Try.of(() -> 42 / 1)
                 .ifThrowsThenGetDefaultOrElseMap(
                         Function.identity(),
                         0,
@@ -29,7 +29,7 @@ public class PureCatchableMappableForCallablesTest {
 
     @Test
     public void mapSuccess() {
-        int result = Try.evaluate(() -> 42 / 6)
+        int result = Try.of(() -> 42 / 6)
                 .ifThrowsThenGetDefaultOrElseMap(
                         num -> num * 2,
                         0,
@@ -39,7 +39,7 @@ public class PureCatchableMappableForCallablesTest {
 
     @Test
     public void registerParentExceptionOfArithmeticException() {
-        int result = Try.evaluate(() -> 42 / 0)
+        int result = Try.of(() -> 42 / 0)
                 .ifThrowsThenGetDefaultOrElseMap(
                         Function.identity(),
                         0,
@@ -49,7 +49,7 @@ public class PureCatchableMappableForCallablesTest {
 
     @Test
     public void registerParentExceptionOfArithmeticException2() {
-        int result = Try.evaluate(() -> 42 / 0)
+        int result = Try.of(() -> 42 / 0)
                 .ifThrowsThenGetDefaultOrElseMap(
                         Function.identity(),
                         0,

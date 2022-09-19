@@ -8,7 +8,7 @@ public class CatchableConsumableWithRunnablesTest {
     @Test
     public void failAndThrowRuntimeException() {
         try {
-            Try.evaluate(() -> { throw new ArithmeticException(); })
+            Try.of(() -> { throw new ArithmeticException(); })
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("Something went wrong");
                         throw new RuntimeException("boom");
@@ -21,7 +21,7 @@ public class CatchableConsumableWithRunnablesTest {
     @Test
     public void succeedWithValue() {
         try {
-            Object object = Try.evaluate(() -> {})
+            Object object = Try.of(() -> {})
                     .ifThrowsThenRunTaskOrElseGet(err -> {
                         System.out.println("Could not divide 10 by 2");
                         throw new RuntimeException("boom");
