@@ -36,16 +36,16 @@ solution with pure java
    }
 ```
 
-solution with `fluenTry` - takes two arguments with `BiFunction` and is composed via `map` and `fold` combinators. May also take 3 args and `TriFunction`, but in rare cases :)
+solution with `fluenTry` - takes three arugments in total two of which are arguments to the third argument, which is a  `BiFunction` instance and is composed via `map` and `fold` combinators. May be also extended with `Tri-Quad-Quint Function` instances, but in rare cases :).
 ```java
    public static String getAndThenDoubleAndThenStringify(List<Integer> list, int index) {
        return Try.of(list, index, List::get).map(n -> n * 2).fold(String::valueOf, "0");
    }
 ```
 
-`fluenTry` enables you to maximize the perks of functional programming and make your functions total, compose possibly failable computations fearlessly and forget about throwing exceptions. Let's see an example below:
+`fluenTry` enables you to maximize the perks of functional programming and turn your partial functions into total ones, compose possibly failable computations fearlessly and forget about throwing exceptions. Let's see another example below:
 
-Failed computation which returns Failure(ArithmeticException) instead of blowing up the calling stack by throwing an exception and succeeds with pure value with the help of `fold` combinator.
+Here is a Failed computation which returns `Failure(ArithmeticException)` instead of blowing up the calling stack by throwing an exception and succeeds with pure value with the help of `fold` combinator.
 ```java
    double result = Try.of(() -> Math.random() * 2 * 5)
            .flatMap(n -> Try.of(() -> n + 1))
@@ -56,7 +56,7 @@ Failed computation which returns Failure(ArithmeticException) instead of blowing
 
 Let's see another example:
 
-problem description: try to parse json string into `Person` instance, if succeeds return true or else return false
+problem description: try to parse json string into `Person` instance, if succeeds return true or else return false.
 
 solution with pure java:
 ```java
@@ -82,6 +82,9 @@ solution with `fluenTry` - takes a string argument and the `Function<T, V>` inst
 
 Let's see something related to java Enums:
 
+problem description: Write a method on Weekend enum which returns true of the passed string is a Weekend day or else return false.
+
+solution with pure java:
 ```java
     public enum Weekend {
     
@@ -101,8 +104,7 @@ Let's see something related to java Enums:
    }
 ```
 
-with `fluenTry:`
-
+with `fluenTry:` - takes a `Supplier<String>` as an argument, then `maps` and finally `folds` to either `true` or `false`:
 ```java
     public enum Weekend {
     
