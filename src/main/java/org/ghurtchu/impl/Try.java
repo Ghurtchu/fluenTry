@@ -2,6 +2,7 @@ package org.ghurtchu.impl;
 
 import org.ghurtchu.protocols.*;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.*;
 
@@ -357,22 +358,34 @@ public abstract class Try<T> implements
     }
 
     /**
-     * abstract method which must be implemented by the children of org.ghurtchu.impl.Try
+     * An abstract method which must be implemented by the children of Try
      */
     protected abstract T getValue();
 
+    /**
+     * Returns the success value
+     */
     private T getSuccessValue() {
         return this.getValue();
     }
 
+    /**
+     * Returns the success value of a success instance
+     */
     private Success<T> getSuccess() {
         return (Success<T>) this;
     }
 
+    /**
+     * Returns the failure instance
+     */
     private Exception getFailureValue() {
         return (Exception) this.getValue();
     }
 
+    /**
+     * Returns an exception value of a failed instance
+     */
     private Failure getFailure() {
         return (Failure) this;
     }
