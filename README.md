@@ -1,4 +1,6 @@
-#### `fluenTry` is a lightweight java library that enables you to handle common `try/catch` procedures in a declarative, composable way.
+#### `fluenTry` is a lightweight java library that enables you to handle common `try/catch` procedures concerned with unchecked exceptions in a declarative, composable way.
+
+Unlike checked exceptions, Unchecked exceptions can be abstracted away in a data structure which enables you to write chain of computations in a composable way. You can not do it with checked exceptions because the code simply won't compile if you don't handle the them via the procedural `try/catch` code.
 
 Declarative style of programming often goes hand in hand with functional style of programming where we describe composable computations on the high level
 and in the end we run it. Java has somewhat decent support for functional style of programming which enables us to raise the abstraction level even higher.
