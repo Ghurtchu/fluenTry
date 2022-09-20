@@ -20,8 +20,6 @@ The main class in the library is called `Try`.
 
 `Try` may be used in different ways, so withot further ado let's see the examples below:
 
-#### #1 A combination of `Try#map and Try#fold` - `Try#map` tranforms the value into new value if the initial computation was successful and returns `Success` with the transformed value in it, or else returns the `Failure` instance which holds the exception. `Try#fold` is used to unwrap the `T` from `Try<T>` in a pure way. 
-
 problem description: try getting the element from the list, if it fails return stringified 0, or else return the stringified square of the success value.
 
 solution with pure java
