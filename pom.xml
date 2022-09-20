@@ -7,6 +7,50 @@
     <groupId>org.example</groupId>
     <artifactId>fluenTry</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>fluenTry</name>
+    <description>A java library for handling common try/catch procedures in a declarative way</description>
+    <url>http://github.com/Ghurtchu/fluenTry</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Anzori (Nika) Ghurtchumelia</name>
+            <email>anzori.gurchumelia@gau.edu.ge</email>
+            <organization>Sonatype</organization>
+            <organizationUrl>http://www.sonatype.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/Ghurtchu/fluenTry.git</connection>
+        <developerConnection>scm:git:git://github.com/Ghurtchu/fluenTry.git</developerConnection>
+        <url>http://github.com/Ghurtchu/fluenTry/tree/master</url>
+    </scm>
+
+   <plugins>
+       <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-gpg-plugin</artifactId>
+           <version>${version.plugin.gpg}</version>
+           <executions>
+               <execution>
+                   <id>sign-artifacts</id>
+                   <phase>verify</phase>
+                   <goals>
+                       <goal>sign</goal>
+                   </goals>
+               </execution>
+           </executions>
+       </plugin>
+   </plugins>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

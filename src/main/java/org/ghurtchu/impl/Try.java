@@ -121,15 +121,14 @@ public abstract class Try<T> implements
     @Override
     public final <V> Try<V> map(Function<? super T, ? extends V> mapper) {
         if (this instanceof Success) {
-            Success<T> success = (Success<T>) this;
-            T value            = success.getValue();
+            T success = getSuccessValue();
             try {
-                return new Success<>(Optional.of(mapper.apply(value)));
+                return new Success<>(Optional.of(mapper.apply(success)));
             } catch (Exception e) {
                 return (Try<V>) new Failure(e);
             }
         } else {
-            return (Try<V>) this;
+            return (Try<V>) new Failure(getFailureValue());
         }
     }
 
@@ -140,15 +139,14 @@ public abstract class Try<T> implements
     @Override
     public final <V> Try<V> flatMap(Function<? super T, ? extends Try<V>> flatMapper) {
         if (this instanceof Success) {
-            Success<T> success = (Success<T>) this;
-            T value            = success.getValue();
+            T success = getSuccessValue();
             try {
-                return flatMapper.apply(value);
+                return flatMapper.apply(success);
             } catch (Exception e) {
                 return (Try<V>) new Failure(e);
             }
         } else {
-            return (Try<V>) this;
+            return (Try<V>) new Failure(getFailureValue());
         }
     }
 
@@ -159,17 +157,16 @@ public abstract class Try<T> implements
     @Override
     public final Try<T> filter(Predicate<? super T> predicate) {
         if (this instanceof Success) {
-            Success<T> success = (Success<T>) this;
-            T value            = success.getValue();
+            T success = getSuccessValue();
             try {
-                return predicate.test(value)
+                return predicate.test(success)
                         ? new Success<>(Optional.of(this.getValue()))
-                        : (Try<T>) new Failure(new NoSuchElementException("predicate does not hold for " + value));
+                        : (Try<T>) new Failure(new NoSuchElementException("predicate does not hold for " + success));
             } catch (Exception e) {
                 return (Try<T>) new Failure(e);
             }
         } else {
-            return this;
+            return (Try<T>) new Failure(getFailureValue());
         }
     }
 
@@ -181,12 +178,11 @@ public abstract class Try<T> implements
     @Override
     public final <V> V fold(Function<? super T, ? extends V> successMapper, V defaultValue) {
         if (this instanceof Success) {
-            Success<T> success = (Success<T>) this;
-            T value = success.getValue();
-            if (value == null) {
-                value = (T) new Object();
+            T success = getSuccessValue();
+            if (Objects.isNull(success)) {
+                success = (T) new Object();
             }
-            return successMapper.apply(value);
+            return successMapper.apply(success);
         } else {
             return defaultValue;
         }
@@ -199,11 +195,8 @@ public abstract class Try<T> implements
      */
     @Override
     public final void endWith(Runnable onSuccess, Runnable onFailure) {
-        if (this instanceof Success) {
-            onSuccess.run();
-        } else {
-            onFailure.run();
-        }
+        if (this instanceof Success) onSuccess.run();
+        else onFailure.run();
     }
 
     /**
@@ -213,11 +206,8 @@ public abstract class Try<T> implements
      */
     @Override
     public final void endWith(Consumer<T> successConsumer, Consumer<Exception> failureConsumer) {
-        if (this instanceof Success) {
-            successConsumer.accept(this.getValue());
-        } else {
-            failureConsumer.accept((Exception) this.getValue());
-        }
+        if (this instanceof Success) successConsumer.accept(this.getValue());
+        else failureConsumer.accept((Exception) this.getValue());
     }
 
     /**
@@ -231,9 +221,10 @@ public abstract class Try<T> implements
     @Override
     public final <V> V ifThrowsThenGetDefaultOrElseMap(Function<? super T, ? extends V> successMapper, V defaultValue, Class<? extends Exception>... clientExceptions) {
         if (this instanceof Failure) {
-            Failure failure = (Failure) this;
-            Class<? extends Exception> currentException       = failure.getValue().getClass();
-            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failure.getValue());
+            Failure failure                                   = getFailure();
+            Exception failureValue                            = getFailureValue();
+            Class<? extends Exception> currentException       = extractCurrentExceptionClass(failure);
+            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failureValue);
             parentExceptions.add(currentException);
             if (Arrays.stream(clientExceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
                 return defaultValue;
@@ -256,9 +247,10 @@ public abstract class Try<T> implements
     @SafeVarargs
     public final T ifThrowsThenRunTaskOrElseGet(Consumer<? super Exception> consumer, Class<? extends Exception>... exceptions) {
         if (this instanceof Failure) {
-            Failure failure = (Failure) this;
-            Class<? extends Exception> currentException       = failure.getValue().getClass();
-            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failure.getValue());
+            Failure failure                                   = getFailure();
+            Exception failureValue                            = getFailureValue();
+            Class<? extends Exception> currentException       = extractCurrentExceptionClass(failure);
+            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failureValue);
             parentExceptions.add(currentException);
             if (Arrays.stream(exceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
                 consumer.accept(failure.getValue());
@@ -267,9 +259,8 @@ public abstract class Try<T> implements
                 throw new UncaughtException();
             }
         } else {
-            Success<T> success = (Success<T>) this;
-            T value = success.getValue();
-            if (value == null) {
+            T value = getSuccessValue();
+            if (Objects.isNull(value)) {
                 value = (T) new Object();
             }
             return value;
@@ -282,9 +273,8 @@ public abstract class Try<T> implements
     @Override
     public Optional<T> toOptional() {
         if (this instanceof Success) {
-            Success<T> success = (Success<T>) this;
-            T value            = success.getValue();
-            if (value == null) {
+            T value = getSuccessValue();
+            if (Objects.isNull(value)) {
                 return Optional.empty();
             } else {
                 return Optional.of(value);
@@ -303,12 +293,13 @@ public abstract class Try<T> implements
     @Override
     public final void ifThrowsThenRunTask(Consumer<? super Exception> errorConsumer, Class<? extends Exception>... clientExceptions) {
         if (this instanceof Failure) {
-            Failure failure = (Failure) this;
-            Class<? extends Exception> currentException       = failure.getValue().getClass();
-            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failure.getValue());
+            Failure failure                                   = getFailure();
+            Exception failureValue                            = getFailureValue();
+            Class<? extends Exception> currentException       = extractCurrentExceptionClass(failure);
+            List<Class<? extends Exception>> parentExceptions = TryUtils.getParentExceptions(failureValue);
             parentExceptions.add(currentException);
             if (Arrays.stream(clientExceptions).anyMatch(exception -> parentExceptions.stream().anyMatch(exception::equals))) {
-                errorConsumer.accept(failure.getValue());
+                errorConsumer.accept(getFailureValue());
             }
         }
     }
@@ -321,6 +312,24 @@ public abstract class Try<T> implements
     }
 
     /**
+     * Runs the success consumer
+     */
+    public void ifSuccess(Consumer<T> successConsumer) {
+        if (this instanceof Success) {
+            successConsumer.accept(getValue());
+        }
+    }
+
+    /**
+     * Runs the failure consumer
+     */
+    public void ifFailure(Consumer<Exception> failureConsumer) {
+        if (this instanceof Failure) {
+            failureConsumer.accept((Exception) getValue());
+        }
+    }
+
+    /**
      * Returns true of the computation failed
      */
     public boolean isFailure() {
@@ -329,15 +338,48 @@ public abstract class Try<T> implements
 
     /**
      * Returns a new successful value wrapped in Try if the preceding computations fail
+     * @param value a default value to be returned in case of failure
      */
     public Try<T> orElse(T value) {
         return new Success<>(Optional.of(value));
     }
 
     /**
+     * Returns a new Try instance if the preceding instance fails or else returns the first one
+     * @param trySupplier a supplier for an alternative try
+     */
+    public Try<T> or(Supplier<? extends Try<T>> trySupplier) {
+        if (this instanceof Success) {
+            return this;
+        } else {
+            return trySupplier.get();
+        }
+    }
+
+    /**
      * abstract method which must be implemented by the children of org.ghurtchu.impl.Try
      */
     protected abstract T getValue();
+
+    private T getSuccessValue() {
+        return this.getValue();
+    }
+
+    private Success<T> getSuccess() {
+        return (Success<T>) this;
+    }
+
+    private Exception getFailureValue() {
+        return (Exception) this.getValue();
+    }
+
+    private Failure getFailure() {
+        return (Failure) this;
+    }
+
+    private Class<? extends Exception> extractCurrentExceptionClass(Failure failure) {
+        return failure.getValue().getClass();
+    }
 
     /**
      * A success case which encapsulates the successful computation
@@ -415,7 +457,7 @@ public abstract class Try<T> implements
             List<Class<? extends Exception>> superExceptions = new ArrayList<>();
             Class<?> superExc                                = exception.getClass().getSuperclass();
             while (true) {
-                if (superExc == null) {
+                if (Objects.isNull(superExc)) {
                     break;
                 } else {
                     superExceptions.add((Class<? extends Exception>) superExc);
