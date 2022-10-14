@@ -138,17 +138,17 @@ More examples? let's see:
 
 ```java
 
-   voic client() {
+   public void client(Cfg cfg) {
      ..
-     Try.of(() -> startServer()).endWith(
+     Try.of(() -> startServer(cfg)).endWith(
                 () -> System.out.println("Server Started"),
                 () -> System.out.println("Server Failed"));
      ..
    }
  
-   void startServer() {
-      int port = 8080;
-      String host = "localhost";
+   private void startServer(Cfg cfg) {
+      int port = cfg.getInt("port");
+      String host = cfg.getString("host");
       var server = new Server(port, host);
       server.start();
     }
