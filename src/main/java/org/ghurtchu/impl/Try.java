@@ -342,7 +342,9 @@ public abstract class Try<T> implements
      * @param value a default value to be returned in case of failure
      */
     public Try<T> orElse(T value) {
-        return new Success<>(Optional.of(value));
+        if (this instanceof Failure) {
+            return new Success<>(Optional.of(value));
+        } else return this;
     }
 
     /**
