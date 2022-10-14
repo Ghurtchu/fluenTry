@@ -117,7 +117,43 @@ with `fluenTry:` - takes a `Supplier<String>` as an argument, then `maps` and fi
    }
 ```   
 
-# TO BE CONTINUED !!!
+Let's see a little bit different flavor of error-recovery:
+
+```java
+  
+  void client() {
+    ..
+    String result = Try.of(() -> unsafeMethod()).orElse("Recovered").get();
+    ..
+  }
+
+  String unsafeMethod() {
+    var rand = new java.util.Random();
+    if (rand.nextBoolean()) return "Succeeded";
+    else throw new RuntimeException("boom");
+  }
+```
+
+More examples? let's see:
+
+```java
+
+   voic client() {
+     ..
+     Try.of(() -> startServer()).endWith(
+                () -> System.out.println("Server Started"),
+                () -> System.out.println("Server Failed"));
+     ..
+   }
+ 
+   void startServer() {
+      int port = 8080;
+      String host = "localhost";
+      var server = new Server(port, host);
+      server.start();
+    }
+```
+
 
 
 
