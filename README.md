@@ -18,7 +18,7 @@ The main class in the library is called `Try`.
 
 `Try` has two sub-classes: `Success<T>` which holds the successful value and `Failure` which holds the exception.
 
-`Try` may be used in different ways, so withot further ado let's see the examples below:
+`Try` may be used in different ways, so without further ado let's see the examples below:
 
 problem description: try getting the element from the list, if it fails return stringified 0, or else return the stringified square of the success value.
 
