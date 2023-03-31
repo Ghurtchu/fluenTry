@@ -115,24 +115,6 @@ with `fluenTry:` - takes a `Supplier<String>` as an argument, then `maps` and fi
    }
 ```   
 
-Let's see a little bit different flavor of error-recovery:
-
-```java
-  
-  void client() {
-    ..
-    String result = Try.of(() -> unsafeMethod()).orElse("Recovered").get();
-    ..
-  }
-
-  String unsafeMethod() {
-    var rand = new java.util.Random();
-    if (rand.nextBoolean()) return "Succeeded";
-    else throw new RuntimeException("boom");
-  }
-```
-
-
 
 
 
