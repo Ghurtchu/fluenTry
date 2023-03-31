@@ -22,7 +22,7 @@ The main class in the library is called `Try`.
 
 problem description: try getting the element from the list, if it fails return stringified 0, or else return the stringified square of the success value.
 
-solution with pure java
+solution with pure java:
 ```java
    public static String getAndThenDoubleAndThenStringify(List<Integer> list, int index) {
        String result;
@@ -36,16 +36,14 @@ solution with pure java
    }
 ```
 
-solution with `fluenTry` - takes three arugments in total two of which are arguments to the third argument, which is a  `BiFunction` instance and is composed via `map` and `fold` combinators. May be also extended with `Tri-Quad-Quint Function` instances, but in rare cases :).
+solution with `fluenTry`:
 ```java
    public static String getAndThenDoubleAndThenStringify(List<Integer> list, int index) {
        return Try.of(list, index, List::get).map(n -> n * 2).fold(String::valueOf, "0");
    }
 ```
 
-`fluenTry` enables you to maximize the perks of functional programming and turn your partial functions into total ones, compose possibly failable computations fearlessly and forget about throwing exceptions. Let's see another example below:
-
-Here is a Failed computation which returns `Failure(ArithmeticException)` instead of blowing up the calling stack by throwing an exception and succeeds with pure value with the help of `fold` combinator.
+Here is a Failed computation which returns `Failure(ArithmeticException)` instead of blowing up the calling stack by throwing an exception and succeeds with pure value with the help of `fold` combinator:
 ```java
    double result = Try.of(() -> Math.random() * 2 * 5)
            .flatMap(n -> Try.of(() -> n + 1))
