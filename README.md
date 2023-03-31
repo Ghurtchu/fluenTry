@@ -132,26 +132,6 @@ Let's see a little bit different flavor of error-recovery:
   }
 ```
 
-More examples? let's see:
-
-```java
-
-   public void client(Cfg cfg) {
-     ..
-     Try.of(() -> startServer(cfg)).endWith(
-                () -> System.out.println("Server Started"),
-                () -> System.out.println("Server Failed"));
-     ..
-   }
- 
-   private void startServer(Cfg cfg) {
-      int port = cfg.getInt("port");
-      String host = cfg.getString("host");
-      var server = new Server(port, host);
-      server.start();
-    }
-```
-
 
 
 
