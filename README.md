@@ -1,6 +1,6 @@
 #### An attempt to port `scala.util.Try` to Java.
 
-The main class in the library is called `Try`.
+The main class is called `Try`.
 
 `Try` has a few overloaded static constructors for instantiating lazy computations which is called `Try.of()`.
 
