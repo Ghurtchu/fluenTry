@@ -44,7 +44,7 @@ Here is a Failed computation which returns `Failure(ArithmeticException)` instea
            .flatMap(n -> Try.of(() -> n + 1))
            .flatMap(n -> Try.of(() -> 55 / 0)) // This is where the `Success` turns into `Failure`
            .map(Math::sqrt)
-           .fold(Function.identity(), 0.0); // but with the help of `fold` combinator we turn that into pure value (0.0)
+           .getOrElse(0.0); // but with the help of `getOrElse` we turn that into pure value
 ```
 
 Let's see another example:
